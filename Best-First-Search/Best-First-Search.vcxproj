@@ -140,6 +140,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Best-First-Search.cpp" />
+    <ClCompile Include="City.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="City.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
