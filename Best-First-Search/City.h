@@ -6,15 +6,13 @@ using namespace std;
 
 class City 
 {
-	private:
+	public:
 		bool visited;
 		string name;
 		string previousCity;
 		double distanceToDest;
 		vector<string> adjacentCities;
-		
-
-
-	public:
+		City();
+		City(string cityName);
 
 };
