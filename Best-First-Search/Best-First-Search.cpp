@@ -16,21 +16,21 @@ double calculateDistance(double initX, double initY, double finalX, double final
     return sqrt(xTerm + yTerm);
 }
 
-void populateMap(vector<City>& cityMap)
+void populateMap(map<City, vector<string>>& cityMap)
 {
     string adjLine;
-    string locLine;
     ifstream adjFile;
-    ifstream locFile;
+ 
     adjFile.open("Adjacencies.txt.");
 
     vector<string> currLine;
-
+    
     if (adjFile.is_open())
     {
         while (getline(adjFile, adjLine))
         {
             string city = "";
+            
             for (int i = 0; i < adjLine.length(); i++)
             {
                 if (adjLine[i] == ' ' && city.length() == 0)
@@ -53,7 +53,7 @@ void populateMap(vector<City>& cityMap)
             {
                 currLine.push_back(city);
             }   
-
+            
             for (int i = 0; i < currLine.size(); i++) 
             {
                 vector<string> restOfVecBefore = vector<string>(currLine.begin(), currLine.end() - currLine.size() + i);
@@ -62,28 +62,22 @@ void populateMap(vector<City>& cityMap)
                 restOfVec.reserve(restOfVecBefore.size() + restOfVecAfter.size());
                 restOfVec.insert(restOfVec.end(), restOfVecAfter.begin(), restOfVecAfter.end());
                 restOfVec.insert(restOfVec.end(), restOfVecBefore.begin(), restOfVecBefore.end());
-                
+
                 City keyCity = City(currLine[i]);
-                bool cityFound = false;
-                for (int i = 0; i < cityMap.size(); i++)
+                
+                if (cityMap.find(keyCity.name) == cityMap.end())
                 {
-                    if (cityMap[i].name == keyCity.name)
-                    {
-                        vector<string> copyVector;
-                        copyVector.reserve(cityMap[i].adjacentCities.size() + restOfVec.size());
-                        copyVector.insert(copyVector.end(), cityMap[i].adjacentCities.begin(), cityMap[i].adjacentCities.end());
-                        copyVector.insert(copyVector.end(), restOfVec.begin(), restOfVec.end());
-                        cityMap[i].adjacentCities = copyVector;
-                        cityFound = true;
-                        break;
-                    }
+                    cityMap[keyCity] = restOfVec;
                 }
 
-                if (!cityFound) 
+                else
                 {
-                    //create new entry in vector, and add adjacent cities
-                    keyCity.adjacentCities = restOfVec;
-                    cityMap.push_back(keyCity);
+                    vector<string> copyVector;
+                    copyVector.reserve(cityMap[keyCity].size() + restOfVec.size());
+                    copyVector.insert(copyVector.end(), cityMap[keyCity].begin(), cityMap[keyCity].end());
+                    copyVector.insert(copyVector.end(), restOfVec.begin(), restOfVec.end());
+                    cityMap[keyCity] = copyVector;
+                    break;                   
                 }
                 
             }
@@ -91,26 +85,48 @@ void populateMap(vector<City>& cityMap)
             currLine.clear();
             
         }
-
-
         adjFile.close();
     }
 }
 
+void populateLocations(vector<City>& cityMap)
+{
+    string locLine;
+    ifstream locFile;
+
+    string city;
+    double x;
+    double y;
+    map<string, pair<double, double>> citiesAndCoords;
+
+    locFile.open("coordinates.txt");
+
+    if (locFile.is_open())
+    {
+        while (getline(locFile, locLine))
+        {
+            locFile >> city >> x >> y;
+            cout << city;
+        }
+    }
+    
+
+
+}
+
 int main()
 {
-    
-    vector<City> cityMap;
+    map<City, vector<string>> cityMap;
     populateMap(cityMap);
     for (auto city : cityMap)
     {
-        cout << city.name << " is adjacent to: ";
-        for (int i = 0; i < city.adjacentCities.size(); i++)
+        cout << city.first.name << " is adjacent to: ";
+        for (int i = 0; i < city.second.size(); i++)
         {
-            cout << city.adjacentCities[i] << ", ";
+            cout << city.second[i] << ", ";
         }
 
         cout << endl << endl << endl;
     }
+    //populateLocations(cityMap);
 }
-

@@ -6,7 +6,6 @@ City::City()
 	name = "";
 	previousCity = "";
 	distanceToDest = 0;
-	adjacentCities = {};
 }
 
 City::City(string cityName)
@@ -15,5 +14,4 @@ City::City(string cityName)
 	name = cityName;
 	previousCity = "";
 	distanceToDest = 0;
-	adjacentCities = {};
 }
