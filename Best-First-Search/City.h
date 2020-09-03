@@ -10,8 +10,16 @@ class City
 		bool visited;
 		string name;
 		string previousCity;
+		double xCoord;
+		double yCoord;
 		double distanceToDest;
 		City();
 		City(string cityName);
+
+		bool operator < (const City& cityObj) const
+		{
+			if (cityObj.name < this->name)
+				return true;
+		}
 
 };

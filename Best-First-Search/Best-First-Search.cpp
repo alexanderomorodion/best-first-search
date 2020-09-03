@@ -16,12 +16,39 @@ double calculateDistance(double initX, double initY, double finalX, double final
     return sqrt(xTerm + yTerm);
 }
 
+map<string, pair<double, double>> populateLocations()
+{
+    string locLine;
+    ifstream locFile;
+
+    string city;
+    double x;
+    double y;
+    map<string, pair<double, double>> citiesAndCoords;
+
+    locFile.open("coordinates.txt");
+
+    if (locFile.is_open())
+    {
+        while (getline(locFile, locLine))
+        {
+            locFile >> city >> x >> y;
+            citiesAndCoords[city] = { x, y };
+        }
+    }
+
+    return citiesAndCoords;
+
+}
+
 void populateMap(map<City, vector<string>>& cityMap)
 {
     string adjLine;
     ifstream adjFile;
  
-    adjFile.open("Adjacencies.txt.");
+    map<string, pair<double, double>> citiesAndCoords = populateLocations();
+
+    adjFile.open("Adjacencies.txt");
 
     vector<string> currLine;
     
@@ -64,6 +91,15 @@ void populateMap(map<City, vector<string>>& cityMap)
                 restOfVec.insert(restOfVec.end(), restOfVecBefore.begin(), restOfVecBefore.end());
 
                 City keyCity = City(currLine[i]);
+
+                map<string, pair<double, double>>::iterator it;
+                it = citiesAndCoords.find(keyCity.name);
+                if (it != citiesAndCoords.end())
+                {
+                    keyCity.xCoord = it->second.first;
+                    keyCity.yCoord = it->second.second;
+                }
+                    
                 
                 if (cityMap.find(keyCity.name) == cityMap.end())
                 {
@@ -89,44 +125,17 @@ void populateMap(map<City, vector<string>>& cityMap)
     }
 }
 
-void populateLocations(vector<City>& cityMap)
+bool sameName(City cityObj, string cityName)
 {
-    string locLine;
-    ifstream locFile;
-
-    string city;
-    double x;
-    double y;
-    map<string, pair<double, double>> citiesAndCoords;
-
-    locFile.open("coordinates.txt");
-
-    if (locFile.is_open())
-    {
-        while (getline(locFile, locLine))
-        {
-            locFile >> city >> x >> y;
-            cout << city;
-        }
-    }
-    
-
-
+    return cityObj.name == cityName;
 }
+
+
 
 int main()
 {
     map<City, vector<string>> cityMap;
     populateMap(cityMap);
-    for (auto city : cityMap)
-    {
-        cout << city.first.name << " is adjacent to: ";
-        for (int i = 0; i < city.second.size(); i++)
-        {
-            cout << city.second[i] << ", ";
-        }
 
-        cout << endl << endl << endl;
-    }
-    //populateLocations(cityMap);
+    return 0;
 }
