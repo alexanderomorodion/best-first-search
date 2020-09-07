@@ -13,6 +13,7 @@ class City
 		double xCoord;
 		double yCoord;
 		double distanceToDest;
+		vector<string> frontier;
 		City();
 		City(string cityName);
 

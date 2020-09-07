@@ -16,7 +16,7 @@ double calculateDistance(double initX, double initY, double finalX, double final
     return sqrt(xTerm + yTerm);
 }
 
-map<string, pair<double, double>> populateLocations()
+void populateLocations(map<string, City>& cityMap)
 {
     string locLine;
     ifstream locFile;
@@ -30,23 +30,21 @@ map<string, pair<double, double>> populateLocations()
 
     if (locFile.is_open())
     {
-        while (getline(locFile, locLine))
+        while (locFile >> city >> x >> y)
         {
-            locFile >> city >> x >> y;
-            citiesAndCoords[city] = { x, y };
+            cityMap[city].xCoord = x;
+            cityMap[city].yCoord = y;
         }
     }
 
-    return citiesAndCoords;
-
 }
 
-void populateMap(map<City, vector<string>>& cityMap)
+void populateMap(map<string, City>& cityMap)
 {
     string adjLine;
     ifstream adjFile;
  
-    map<string, pair<double, double>> citiesAndCoords = populateLocations();
+    //map<string, pair<double, double>> citiesAndCoords = populateLocations();
 
     adjFile.open("Adjacencies.txt");
 
@@ -91,29 +89,20 @@ void populateMap(map<City, vector<string>>& cityMap)
                 restOfVec.insert(restOfVec.end(), restOfVecBefore.begin(), restOfVecBefore.end());
 
                 City keyCity = City(currLine[i]);
-
-                map<string, pair<double, double>>::iterator it;
-                it = citiesAndCoords.find(keyCity.name);
-                if (it != citiesAndCoords.end())
-                {
-                    keyCity.xCoord = it->second.first;
-                    keyCity.yCoord = it->second.second;
-                }
-                    
+                keyCity.frontier = restOfVec;
                 
                 if (cityMap.find(keyCity.name) == cityMap.end())
                 {
-                    cityMap[keyCity] = restOfVec;
+                    cityMap[keyCity.name] = keyCity;
                 }
 
                 else
                 {
                     vector<string> copyVector;
-                    copyVector.reserve(cityMap[keyCity].size() + restOfVec.size());
-                    copyVector.insert(copyVector.end(), cityMap[keyCity].begin(), cityMap[keyCity].end());
+                    copyVector.reserve(cityMap[keyCity.name].frontier.size() + restOfVec.size());
+                    copyVector.insert(copyVector.end(), cityMap[keyCity.name].frontier.begin(), cityMap[keyCity.name].frontier.end());
                     copyVector.insert(copyVector.end(), restOfVec.begin(), restOfVec.end());
-                    cityMap[keyCity] = copyVector;
-                    break;                   
+                    cityMap[keyCity.name].frontier = copyVector;                  
                 }
                 
             }
@@ -134,8 +123,21 @@ bool sameName(City cityObj, string cityName)
 
 int main()
 {
-    map<City, vector<string>> cityMap;
+    map<string, City> cityMap;
     populateMap(cityMap);
+    populateLocations(cityMap);
 
+    string startPoint;
+    string endPoint;
+
+    cout << "Enter starting point: " << endl;
+    cin >> startPoint;
+    cout << "Enter ending point: " << endl;
+    cin >> endPoint;
+
+    if (cityMap.find(startPoint) != cityMap.end() && cityMap.find(endPoint) != cityMap.end())
+    {
+        bestFirstSearch(cityMap, startPoint, endPoint);
+    }
     return 0;
 }

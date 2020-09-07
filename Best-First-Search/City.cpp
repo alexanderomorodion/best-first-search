@@ -15,6 +15,8 @@ City::City(string cityName)
 	visited = false;
 	name = cityName;
 	previousCity = "";
+	xCoord = 0;
+	yCoord = 0;
 	distanceToDest = 0;
 }
 
