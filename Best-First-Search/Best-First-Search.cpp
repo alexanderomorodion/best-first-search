@@ -6,9 +6,24 @@
 #include <string>
 #include <sstream>
 #include "City.h"
+#include <unordered_set>
 
 using namespace std;
 
+//removes duplicate elements from vector
+void remove(vector<string>& v)
+{
+    vector<string>::iterator itr = v.begin();
+    unordered_set<string> s;
+
+    for (auto curr = v.begin(); curr != v.end(); ++curr) {
+        if (s.insert(*curr).second)
+            *itr++ = *curr;
+    }
+
+    v.erase(itr, v.end());
+}
+//calculates distance between two 2d points
 double calculateDistance(double initX, double initY, double finalX, double finalY)
 {
     double xTerm = pow((finalX - initX), 2);
@@ -16,6 +31,7 @@ double calculateDistance(double initX, double initY, double finalX, double final
     return sqrt(xTerm + yTerm);
 }
 
+//reads from location file and assigns x and y coordinates to each city obj
 void populateLocations(map<string, City>& cityMap)
 {
     string locLine;
@@ -39,6 +55,7 @@ void populateLocations(map<string, City>& cityMap)
 
 }
 
+//reads from adjacencies file and assigns adjacent cities to each city obj
 void populateMap(map<string, City>& cityMap)
 {
     string adjLine;
@@ -102,6 +119,7 @@ void populateMap(map<string, City>& cityMap)
                     copyVector.reserve(cityMap[keyCity.name].frontier.size() + restOfVec.size());
                     copyVector.insert(copyVector.end(), cityMap[keyCity.name].frontier.begin(), cityMap[keyCity.name].frontier.end());
                     copyVector.insert(copyVector.end(), restOfVec.begin(), restOfVec.end());
+                    remove(copyVector);
                     cityMap[keyCity.name].frontier = copyVector;                  
                 }
                 
@@ -114,15 +132,63 @@ void populateMap(map<string, City>& cityMap)
     }
 }
 
-bool sameName(City cityObj, string cityName)
+//finds path between origin and goal using best first search
+vector<string> bestFirstSearch(map<string, City> cityMap, string startPoint, string endPoint)
 {
-    return cityObj.name == cityName;
+    vector<string> path;
+    City* start = &cityMap[startPoint];
+    City* end = &cityMap[endPoint];
+
+    City* tracker = start;
+    
+    path.push_back(start->name);
+    while (tracker->distanceToDest != 0)
+    {
+        double minDistance = 100000000;
+        string closestCity = tracker->name;
+        tracker->visited = true;
+        for (int i = 0; i < tracker->frontier.size(); i++)
+        {
+            City nextCity = cityMap[tracker->frontier[i]];
+            if (nextCity.visited == false)
+            {
+                double distanceToDest = calculateDistance(nextCity.xCoord, nextCity.yCoord, end->xCoord, end->yCoord);
+                cityMap[nextCity.name].distanceToDest = distanceToDest;
+
+                if (distanceToDest < minDistance)
+                {
+                    closestCity = nextCity.name;
+                    minDistance = distanceToDest;
+                }
+            }
+            
+        }
+
+        cityMap[closestCity].visited = true;
+        path.push_back(closestCity);
+        if (closestCity == tracker->name)
+        {
+            tracker = &cityMap[tracker->previousCity];
+            path.pop_back();
+        }
+
+        else
+        {
+            cityMap[closestCity].previousCity = tracker->name;
+            tracker = &cityMap[closestCity];
+        }
+        
+    }
+
+    return path;
+
 }
 
 
 
 int main()
 {
+    vector<string> path;
     map<string, City> cityMap;
     populateMap(cityMap);
     populateLocations(cityMap);
@@ -137,7 +203,11 @@ int main()
 
     if (cityMap.find(startPoint) != cityMap.end() && cityMap.find(endPoint) != cityMap.end())
     {
-        bestFirstSearch(cityMap, startPoint, endPoint);
+        path = bestFirstSearch(cityMap, startPoint, endPoint);
     }
+
+    cout << path[0];
+    for (int i = 1; i < path.size(); i++)
+        cout << " -> " << path[i];
     return 0;
 }
