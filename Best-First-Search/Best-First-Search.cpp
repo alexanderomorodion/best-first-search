@@ -144,10 +144,12 @@ vector<string> bestFirstSearch(map<string, City> cityMap, string startPoint, str
     path.push_back(start->name);
     while (tracker->distanceToDest != 0)
     {
+        int frontierCount = tracker->frontier.size();
+        int numVisited = 0;
         double minDistance = 100000000;
         string closestCity = tracker->name;
         tracker->visited = true;
-        for (int i = 0; i < tracker->frontier.size(); i++)
+        for (int i = 0; i < frontierCount; i++)
         {
             City nextCity = cityMap[tracker->frontier[i]];
             if (nextCity.visited == false)
@@ -161,8 +163,17 @@ vector<string> bestFirstSearch(map<string, City> cityMap, string startPoint, str
                     minDistance = distanceToDest;
                 }
             }
+
+            else
+            {
+                numVisited++;
+                if (numVisited == frontierCount)
+                    return vector<string>();
+            }
             
         }
+
+        
 
         cityMap[closestCity].visited = true;
         path.push_back(closestCity);
@@ -192,22 +203,42 @@ int main()
     map<string, City> cityMap;
     populateMap(cityMap);
     populateLocations(cityMap);
+    char ans = 'Y';
 
     string startPoint;
     string endPoint;
 
-    cout << "Enter starting point: " << endl;
-    cin >> startPoint;
-    cout << "Enter ending point: " << endl;
-    cin >> endPoint;
-
-    if (cityMap.find(startPoint) != cityMap.end() && cityMap.find(endPoint) != cityMap.end())
+    while (ans == 'Y')
     {
-        path = bestFirstSearch(cityMap, startPoint, endPoint);
-    }
+        cout << "Enter starting point: " << endl;
+        cin >> startPoint;
+        cout << "Enter ending point: " << endl;
+        cin >> endPoint;
 
-    cout << path[0];
-    for (int i = 1; i < path.size(); i++)
-        cout << " -> " << path[i];
+
+        if (cityMap.find(startPoint) != cityMap.end() && cityMap.find(endPoint) != cityMap.end())
+        {
+            if (startPoint == endPoint)
+                path.push_back(startPoint);
+            else
+                path = bestFirstSearch(cityMap, startPoint, endPoint);
+        }
+
+        if (path.size() != 0)
+        {
+            cout << "Path: " << path[0];
+            for (int i = 1; i < path.size(); i++)
+                cout << " -> " << path[i];
+        }
+
+        else
+            cout << "No path found";
+        cout << endl << endl << endl;
+
+        cout << "Again? (Y/N)" << endl;
+        cin >> ans;
+        ans = toupper(ans);
+    }
+    
     return 0;
 }
