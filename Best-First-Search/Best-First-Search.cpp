@@ -163,28 +163,23 @@ vector<string> bestFirstSearch(map<string, City> cityMap, string startPoint, str
                     minDistance = distanceToDest;
                 }
             }
-
-            else
-            {
-                numVisited++;
-                if (numVisited == frontierCount)
-                    return vector<string>();
-            }
             
         }
 
-        
-
-        cityMap[closestCity].visited = true;
-        path.push_back(closestCity);
+             
         if (closestCity == tracker->name)
         {
-            tracker = &cityMap[tracker->previousCity];
-            path.pop_back();
+            if (tracker->previousCity != "")
+                tracker = &cityMap[tracker->previousCity];
+
+            else
+                return vector<string>();
         }
 
         else
         {
+            path.push_back(closestCity);
+            cityMap[closestCity].visited = true;
             cityMap[closestCity].previousCity = tracker->name;
             tracker = &cityMap[closestCity];
         }
